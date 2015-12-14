@@ -116,9 +116,10 @@
 #define	STRING		0x03
 #define	INTERFACE	0x04
 #define	ENDPOINT	0x05
+#define QUALIFIER	0x06
 
 ; HID class descriptor types
-#define HID			0x21
+#define HID		0x21
 #define REPORT		0x22
 #define PHYSICAL	0x23
 

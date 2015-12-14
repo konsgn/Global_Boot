@@ -97,7 +97,7 @@
 
 ; CONFIG6H
   CONFIG  WRTC = OFF            ; Configuration Registers Write Protect (Configuration registers (300000-3000FFh) are not write-protected)
-  CONFIG  WRTB = OFF            ; Boot Block Write Protect (Boot block (0000-7FFh) is not write-protected)
+  CONFIG  WRTB = ON             ; Boot Block Write Protect (Boot block (0000-7FFh) is not write-protected)
   CONFIG  WRTD = OFF            ; Data EEPROM Write Protect (Data EEPROM is not write-protected)
 
 ; CONFIG7L
@@ -107,7 +107,7 @@
   CONFIG  EBTR3 = OFF           ; Block 3 Table Read Protect (Block 3 is not protected from table reads executed in other blocks)
 
 ; CONFIG7H
-  CONFIG  EBTRB = ON           ; Boot Block Table Read Protect (Boot block is protected from table reads executed in other blocks)
+  CONFIG  EBTRB = OFF           ; Boot Block Table Read Protect (Boot block is protected from table reads executed in other blocks)
 
 
 #define	SHOW_ENUM_STATUS
@@ -180,8 +180,8 @@ Device
 			db			0x00, 0x02			; bcdUSB (low byte), bcdUSB (high byte)
 			db			0x00, 0x02			; bDeviceClass, bDeviceSubClass
 			db			0x00, MAX_PACKET_SIZE	; bDeviceProtocol, bMaxPacketSize
-			db			0xD8, 0x04			; idVendor (low byte), idVendor (high byte)
-			db			0x01, 0x00			; idProduct (low byte), idProduct (high byte)
+			db			0x09, 0x12			; idVendor (low byte), idVendor (high byte)
+			db			0x07, 0xB0			; idProduct (low byte), idProduct (high byte)
 			db			0x01, 0x00			; bcdDevice (low byte), bcdDevice (high byte)
 			db			0x01, 0x02			; iManufacturer, iProduct
 			db			0x00, NUM_CONFIGURATIONS	; iSerialNumber (none), bNumConfigurations
@@ -216,32 +216,32 @@ String0
 			db			0x09, 0x04			; wLANGID[0] (low byte), wLANGID[0] (high byte)
 String1
 			db			String2-String1, STRING	; bLength, bDescriptorType
-			db			'M', 0x00			; bString
-			db			'i', 0x00
-			db			'c', 0x00
-			db			'r', 0x00
-			db			'o', 0x00
-			db			'c', 0x00
-			db			'h', 0x00
-			db			'i', 0x00
-			db			'p', 0x00
-			db			' ', 0x00
-			db			'T', 0x00
-			db			'e', 0x00
-			db			'c', 0x00
-			db			'h', 0x00
-			db			'n', 0x00
-			db			'o', 0x00
+			db			'G', 0x00			; bString
 			db			'l', 0x00
 			db			'o', 0x00
-			db			'g', 0x00
-			db			'y', 0x00
-			db			',', 0x00
+			db			'b', 0x00
+			db			'a', 0x00
+			db			'l', 0x00
 			db			' ', 0x00
-			db			'I', 0x00
-			db			'n', 0x00
-			db			'c', 0x00
-			db			'.', 0x00
+			db			'B', 0x00
+			db			'o', 0x00
+			db			'o', 0x00
+			db			't', 0x00
+			db			'l', 0x00
+			db			'o', 0x00
+			db			'a', 0x00
+			db			'd', 0x00
+			db			'e', 0x00
+			db			'r', 0x00
+			db			' ', 0x00
+			db			'f', 0x00
+			db			'o', 0x00
+			db			'r', 0x00
+			db			' ', 0x00
+			db			'Y', 0x00
+			db			'o', 0x00
+			db			'u', 0x00
+			db			'!', 0x00
 String2
 			db			rawhid_report_desc-String2, STRING	; bLength, bDescriptorType
 			db			'K', 0x00			; bString
@@ -466,10 +466,10 @@ ServiceUSB
 							call		ProcessInToken
 							break
 						case TOKEN_OUT
-                            btg         PORTC,1,ACCESS
+							btg         PORTC,1,ACCESS
 							call		ProcessOutToken
-                            break
-                        default
+							break
+						default
 					ends
 					banksel USB_error_flags
 					ifset USB_error_flags, 0, BANKED	; if there was a Request Error...
@@ -852,6 +852,13 @@ StandardRequests
 								call		SendDescriptorPacket
 							endi
 							break
+;						case QUALIFIER
+;							bsf         PORTA,RA6,ACCESS        ; Red
+;							bcf         PORTC,RC0,ACCESS        ; Green
+;							bcf         PORTC,RC1,ACCESS        ; Blue
+;							banksel	    USB_error_flags
+;							bsf	    USB_error_flags, 0, BANKED	; set Request Error flag
+;							break	
 						case REPORT
 							movf		USB_buffer_data+wValue, W, BANKED
 							select
@@ -862,7 +869,7 @@ StandardRequests
 									bsf			USB_error_flags, 0, BANKED	; set Request Error flag
 							ends
 							ifclr USB_error_flags, 0, BANKED
-                                movwf       USB_desc_ptr, BANKED
+								movwf       USB_desc_ptr, BANKED
 								movlw		HID_REPORT_SIZE			; get total descriptor length
 								movwf		USB_bytes_left, BANKED
 								ifl USB_buffer_data+(wLength+1), ==, 0
@@ -1356,7 +1363,7 @@ osc_start:
 			clrf		CM1CON0, ACCESS
 			clrf		CM2CON0, ACCESS
 
-			;move to Application if the button is pressed
+			;move to Application if the button is not pressed
             bsf         LATB,RB7,ACCESS
 ;loopb
 ;            btfss       PORTB,RB7,ACCESS
