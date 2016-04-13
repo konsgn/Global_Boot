@@ -20,16 +20,17 @@
 ;     11/07/2010 - The code was adapted to the low pin count PIC18f14k50
 ;                  by Peter Jakab, see http://jap.hu/electronic/pic18-usb.html
 ;
+;     12/14/2016 - The code was adapted to act as a HID device based 
+;		   bootloader by Konstantin Avdashchenko
+;
 ; ============================================================================
 ; 
 ; Peripheral Description:
 ; 
-; This peripheral enumerates as a vendor-specific device. The main event loop 
-; blinks an LED connected to RA1 on and off at about 2 Hz and the peripheral 
-; responds to a pair of vendor-specific requests that turn on or off an LED ;
-; connected to RA0.  The firmware is configured to use an external 4-MHz 
-; crystal, to operate as a low-speed USB device, and to use the internal 
-; pull-up resistor.
+; This peripheral enumerates as a HID device. It then allows for rewriting the
+; firmware located at 0x1000-onwards. The method for sending data to the device
+; is based an a slighly modified halfkay protocol where there are 4 bytes 
+; assigned to addressing and control rather than only 2.
 ; 
 ; ============================================================================
 ;
